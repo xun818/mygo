@@ -1,0 +1,28 @@
+.student-dashboard .section {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px 0;
+  }
+  .quiz-section .question-block {
+    margin-bottom: 10px;
+  }
+  .option-label {
+    margin-right: 15px;
+  }
+  .result-section .bar-chart {
+    width: 100%;
+    background: #eee;
+    margin: 10px 0;
+    text-align: center;
+    position: relative;
+  }
+  .result-section .bar-chart .bar {
+    width: 50px;
+    background: #4caf50;
+    color: #fff;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  

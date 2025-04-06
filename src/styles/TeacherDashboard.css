@@ -1,0 +1,22 @@
+.teacher-dashboard .section {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px 0;
+  }
+  .teacher-dashboard .section h3 {
+    margin: 0 0 5px;
+  }
+  .teacher-dashboard .section input, 
+  .teacher-dashboard .section textarea {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+  }
+  .ai-result {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 5px;
+    max-height: 150px;
+    overflow: auto;
+  }
+  
