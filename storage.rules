@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // 既存 lectures 目錄規則
+    match /lectures/{courseId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.auth.token.role == "teacher";
+    }
+    // 新增：讓登入的 user 都能讀 ai 生成的考卷 PDF
+    match /quizzes/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.auth.token.role == "teacher";
+    }
+  }
+}

@@ -1,0 +1,47 @@
+/* 路徑：src/pages/TeacherQuizList.css */
+.teacher-quiz-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 24px;
+}
+
+.quiz-card {
+  position: relative;
+  border: 2px solid #000;
+  border-radius: 24px;
+  padding: 32px 48px;
+  min-width: 200px;
+  text-align: center;
+  transition: box-shadow .2s;
+}
+
+.quiz-card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.quiz-title {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+
+.quiz-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.quiz-actions button {
+  border: 1px solid #666;
+  background: #fff;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.quiz-actions button:hover {
+  background: #f0f0f0;
+}

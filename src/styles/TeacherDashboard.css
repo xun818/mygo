@@ -1,22 +1,139 @@
-.teacher-dashboard .section {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin: 10px 0;
-  }
-  .teacher-dashboard .section h3 {
-    margin: 0 0 5px;
-  }
-  .teacher-dashboard .section input, 
-  .teacher-dashboard .section textarea {
-    display: block;
-    width: 100%;
-    margin: 5px 0;
-  }
-  .ai-result {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 5px;
-    max-height: 150px;
-    overflow: auto;
-  }
-  
+/* ---------- TeacherDashboard.css ---------- */
+
+.teacher-dashboard {
+  padding: 20px;
+  font-family: "Noto Sans TC", sans-serif;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-bottom: 40px;
+}
+
+.section h2 {
+  margin-bottom: 12px;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.list .list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+.grid-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.grid-item {
+  width: 200px;
+  border: 2px solid red;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grid-item .doc-title {
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.grid-item .actions {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.doc-icon {
+  font-size: 36px;
+}
+
+.form-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.list-block {
+  flex: 1;
+  min-width: 300px;
+}
+
+.list-block h3 {
+  margin-bottom: 10px;
+}
+
+/* 修正 AI 出題講義清單的下拉選單寬度 */
+.ai-lecture-select {
+  min-width: 220px;
+  max-width: 300px;
+}
+
+/* 顯示 AI 出題講義按鈕列 */
+.lecture-option-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.lecture-option-buttons button {
+  padding: 6px 10px;
+  border: 1px solid #aaa;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.lecture-option-buttons button:hover {
+  background-color: #dcdcdc;
+}
+
+/* ✅ AI 出題輸入欄位調整 */
+.ai-generator input[type="number"],
+.ai-generator input[type="text"] {
+  width: 80px;
+}
+
+.ai-generator select[multiple] {
+  height: 100px;
+  padding: 4px;
+}

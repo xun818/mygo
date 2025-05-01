@@ -1,98 +1,73 @@
-import { useEffect, useState } from "react";
-import { db, auth } from "../services/firebase";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+// src/pages/StudentQuizList.jsx
+import React, { useEffect, useState } from 'react';
+import { db } from '../services/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import '../styles/StudentQuizList.css';
 
 export default function StudentQuizList() {
+  const [courses, setCourses] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
-  const [recommendedLevel, setRecommendedLevel] = useState(2);
+  const [selectedCourse, setSelectedCourse] = useState(''); // '' => 全部
   const navigate = useNavigate();
 
-  // 取得推薦難度
+  // 1. 抓取所有課程
   useEffect(() => {
-    const fetchAnswers = async () => {
-      const q = query(
-        collection(db, "answers"),
-        where("studentId", "==", auth.currentUser?.uid ?? "anonymous")
-      );
-      const snapshot = await getDocs(q);
-      const results = snapshot.docs.map((doc) => doc.data());
-
-      // 根據難度分類最近連續 3 次作答
-      const historyByLevel = {};
-      results.forEach((r) => {
-        const level = r.quizAvgDifficulty ?? 2;
-        historyByLevel[level] = historyByLevel[level] || [];
-        historyByLevel[level].push(r.score);
-      });
-
-      // 推薦邏輯：連續三次在某難度答對率高 → 推薦升級
-      let best = 2;
-      for (let level = 1; level <= 5; level++) {
-        const scores = historyByLevel[level] || [];
-        const recent = scores.slice(-3);
-        const highAccuracy = recent.every((s) => s >= 80);
-        if (recent.length === 3 && highAccuracy) {
-          best = Math.min(5, level + 1); // 升級
-        }
-      }
-
-      setRecommendedLevel(best);
-    };
-
-    fetchAnswers();
+    (async () => {
+      const snap = await getDocs(collection(db, 'courses'));
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setCourses(list);
+    })();
   }, []);
 
+  // 2. 抓取所有考卷
   useEffect(() => {
-    const fetchQuizzes = async () => {
-      const snapshot = await getDocs(collection(db, "quizzes"));
-      const list = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+    (async () => {
+      const snap = await getDocs(collection(db, 'quizzes'));
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setQuizzes(list);
+    })();
+  }, []);
 
-      // 推薦優先排序
-      const sorted = list.sort((a, b) => {
-        if (a.avgDifficulty === recommendedLevel && b.avgDifficulty !== recommendedLevel) return -1;
-        if (b.avgDifficulty === recommendedLevel && a.avgDifficulty !== recommendedLevel) return 1;
-        return 0;
-      });
-
-      setQuizzes(sorted);
-    };
-
-    fetchQuizzes();
-  }, [recommendedLevel]);
+  // 3. 篩選：selectedCourse === '' → 全部；否則只留屬於該 courseId 的
+  const available = selectedCourse
+    ? quizzes.filter(q => q.courseId === selectedCourse)
+    : quizzes;
 
   return (
-    <div style={{ padding: "40px" }}>
+    <div className="student-quiz-list" style={{ padding: 24 }}>
       <h1>📘 可作答考卷清單</h1>
-      <p>⭐ 推薦難度：{recommendedLevel} 顆星</p>
-      <ul>
-        {quizzes.map((quiz) => (
-          <li
-            key={quiz.id}
-            style={{
-              border:
-                quiz.avgDifficulty === recommendedLevel
-                  ? "3px solid gold"
-                  : "1px solid #ccc",
-              padding: "10px",
-              marginBottom: "10px",
-              borderRadius: "10px",
-            }}
-          >
-            <strong>{quiz.name}</strong>（{quiz.avgDifficulty} 星）
-            <br />
-            <button onClick={() => navigate(`/student/quiz/${quiz.id}`)}>開始作答</button>
-          </li>
-        ))}
-      </ul>
+
+      <div style={{ marginBottom: 16 }}>
+        <label>選擇課程： </label>
+        <select
+          value={selectedCourse}
+          onChange={e => setSelectedCourse(e.target.value)}
+        >
+          <option value="">全部課程</option>
+          {courses.map(c => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {available.length === 0 ? (
+        <p>目前沒有考卷</p>
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {available.map(q => (
+            <li key={q.id} style={{ marginBottom: 12 }}>
+              <strong>{q.name || '未命名考卷'}</strong>{' '}
+              （★{Math.round(q.averageDifficulty)}）{' '}
+              <button onClick={() => navigate(`/student/quiz/${q.id}`)}>
+                作答
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

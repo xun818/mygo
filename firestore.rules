@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+                        && request.auth.uid == userId;
+    }
+
+    match /courses/{courseId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "teacher";
+    }
+
+    match /lectures/{lectureId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "teacher";
+    }
+
+    match /quizzes/{quizId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "teacher";
+    }
+
+    match /results/{resultId} {
+      allow read, write: if request.auth != null
+                        && request.auth.uid == resource.data.studentId;
+    }
+
+    // —— 新增這一段，讓身分為 teacher 的使用者能夠讀 studentResults —— 
+    match /studentResults/{resId} {
+      // 只有 teacher 可以讀
+      allow read: if request.auth != null
+                  && get(/databases/$(database)/documents/users/$(request.auth.uid))
+                       .data.role == "teacher";
+      // 不允許從前端寫入
+      allow write: if false;
+    }
+  }
+}
