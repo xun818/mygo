@@ -1,3 +1,4 @@
+// 路徑：src/components/TeacherDashboard.jsx
 import React, { useState, useEffect } from "react";
 import AiQuizGenerator from "./AiQuizGenerator";
 import "../styles/TeacherDashboard.css";
@@ -15,6 +16,7 @@ import {
   uploadBytes,
   getDownloadURL,
   deleteObject,
+  getBlob,              // ★ 新增：直接抓 Blob 免 CORS
 } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineRobot } from "react-icons/ai";
@@ -137,14 +139,14 @@ export default function TeacherDashboard() {
     const list = snap.docs
       .filter(d => d.data().studentId === uid)
       .map(d => {
-        const data = d.data();
+        const data  = d.data();
         const fname = data.fileName || data.storagePath.split("/").pop();
         return { id: d.id, storagePath: data.storagePath, fileName: fname };
       });
     setExamList(list);
   };
 
-  /* ========== 課程 CRUD ========== */
+  /* ========== 課程 CRUD（略，原樣保留） ========== */
   const handleAddCourse = async () => {
     if (!newCourseName.trim()) return;
     const docRef = await addDoc(collection(db, "courses"), {
@@ -163,7 +165,7 @@ export default function TeacherDashboard() {
     if (selectedCourse === id) setSelectedCourse("");
   };
 
-  /* ========== 講義 CRUD ========== */
+  /* ========== 講義 CRUD（略，原樣保留） ========== */
   const handleUploadPdf = async () => {
     if (!selectedFile || !selectedCourse) {
       alert("請選擇課程並上傳檔案");
@@ -193,7 +195,7 @@ export default function TeacherDashboard() {
     fetchLectureMetadata();
   };
 
-  /* ========== 刪考卷 ========== */
+  /* ========== 刪考卷（略，原樣保留） ========== */
   const deleteQuizWithQuestions = async quizId => {
     if (!window.confirm("確定刪除考卷？")) return;
     try {
@@ -207,7 +209,7 @@ export default function TeacherDashboard() {
     }
   };
 
-  /* ========== AI 生成完成 ========== */
+  /* ========== AI 生成完成（略，原樣保留） ========== */
   const handleQuizGenerated = async () => {
     await fetchQuizzes();
     setShowAI(false);
@@ -231,27 +233,34 @@ export default function TeacherDashboard() {
       const form = new FormData();
       form.append("author_name", selStudent);
 
-      const names = [];
-      for (const e of examList.filter(x => checkedExamIds.includes(x.id))) {
-        const url = await getDownloadURL(ref(storage, e.storagePath));
-        const blob = await (await fetch(url)).blob();
-        const ext  = e.fileName.split(".").pop().toLowerCase().split("?")[0];
+      // ---- 1. 直接向 GCS 抓 Blob，完全避開瀏覽器 CORS ----
+      const selectedExams = examList.filter(x => checkedExamIds.includes(x.id));
+      for (const e of selectedExams) {
+        let blob;
+        try {
+          blob = await getBlob(ref(storage, e.storagePath));
+        } catch {
+          throw new Error(`無法下載 ${e.fileName}`);
+        }
+        const ext  = e.fileName.split(".").pop().toLowerCase();
         const type = ext === "png" ? "image/png" : "image/jpeg";
         form.append("files", new File([blob], e.fileName, { type }));
-        names.push(e.fileName);
       }
 
+      // ---- 2. 呼叫後端 /verify ----
       const res = await fetch("http://localhost:8000/verify", { method:"POST", body:form });
       const j   = await res.json();
       if (!res.ok) throw new Error(j.detail || JSON.stringify(j));
 
+      // ---- 3. 顯示結果（支援批次）----
       let txt;
       if (Array.isArray(j.results)) {
         txt = j.results
               .map(r => `${r.file} → ${(r.similarity*100).toFixed(1)}% : ${r.result}`)
               .join("\n");
       } else {
-        txt = `${names[0]} → ${(j.similarity*100).toFixed(1)}% : ${j.result}`;
+        const [only] = selectedExams;
+        txt = `${only.fileName} → ${(j.similarity*100).toFixed(1)}% : ${j.result}`;
       }
       setVerifyStatus(txt);
     } catch (e) {
